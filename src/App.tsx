@@ -1,18 +1,12 @@
-import { useState } from "react"
+import { useAlert } from "./Alert"
 import "./App.css"
 import Content from "./Content"
-import Alert from "./Alert"
 
 function App() {
-  const [hidden, setHidden] = useState(true)
+  const alert = useAlert()
   return (
     <div className="app">
-      <button onClick={() => setHidden(false)}>open Modal</button>
-      <Alert
-        content={<Content></Content>}
-        hidden={hidden}
-        setHidden={setHidden}
-      ></Alert>
+      <button onClick={() => alert.show(<Content />)}>open Modal</button>
     </div>
   )
 }

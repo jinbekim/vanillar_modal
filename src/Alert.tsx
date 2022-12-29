@@ -1,23 +1,63 @@
-import { useState } from "react"
+import { useEffect } from "react"
+import { atom, useRecoilState, useRecoilValue } from "recoil"
+import { ReactNode } from "react"
 
-interface AlertProps {
+interface alertAtomType {
   hidden: boolean
-  setHidden: (hidden: boolean) => void
-  content?: React.ReactNode
+  child: ReactNode | null
 }
-const Alert = ({ hidden, setHidden, content }: AlertProps) => {
+
+const alertAtom = atom<alertAtomType>({
+  key: "alertAtom",
+  default: {
+    hidden: true,
+    child: null,
+  },
+})
+
+export const useAlert = () => {
+  const [alert, setAlert] = useRecoilState(alertAtom)
+
+  const show = (child: ReactNode) => {
+    setAlert({ hidden: false, child })
+  }
+
+  const hide = () => {
+    setAlert({ hidden: true, child: null })
+  }
+
+  return { show, hide }
+}
+
+const Alert = () => {
+  const { show, hide } = useAlert()
+  const alert = useRecoilValue(alertAtom)
+
+  useEffect(() => {
+    // close when press escape
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        hide()
+      }
+    }
+    document.addEventListener("keydown", handleEscape)
+    return () => {
+      document.removeEventListener("keydown", handleEscape)
+    }
+  }, [])
+
   return (
     <div
       className="alert"
       style={{
-        display: `${hidden ? "none" : "block"}`,
+        display: `${alert.hidden ? "none" : "block"}`,
       }}
     >
       <div className="alert-content">
-        {content}
-        <button onClick={() => setHidden(true)}>x</button>
+        {alert.child}
+        <button onClick={hide}>x</button>
       </div>
-      <div className="alert-overlay" onClick={() => setHidden(true)}></div>
+      <div className="alert-overlay" onClick={hide}></div>
     </div>
   )
 }
